@@ -1,0 +1,6 @@
+framework module Pods_RxLoginTests {
+  umbrella header "Pods-RxLoginTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
