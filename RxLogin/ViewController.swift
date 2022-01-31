@@ -15,7 +15,8 @@ final class ViewController: UIViewController {
     @IBOutlet private weak var password1TextField: UITextField!
     @IBOutlet private weak var password2TextField: UITextField!
     @IBOutlet private weak var registerButton: UIButton!
-    private var disoseBag: DisposeBag!
+    
+    private let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,26 +24,28 @@ final class ViewController: UIViewController {
             .map { $0 ?? "" }
             .map { $0.count >= 10 }
         
-        let isValidPassword1 = password1TextField.rx.text
+        let password1 = password1TextField.rx.text
             .map { $0 ?? "" }
-            .map { $0.count >= 8 }
         
-        let isValidPassword2 = password2TextField.rx.text
+        let password2 = password2TextField.rx.text
             .map { $0 ?? "" }
-            .map { $0.count >= 8 }
         
-        let isValidPassword = Observable.combineLatest(password1TextField.rx.text.map { $0 ?? "" },
-                                                       password2TextField.rx.text.map { $0 ?? "" }
-        )
+        let isValidPassword = Observable
+            .combineLatest(password1, password2)
             .map { password1, password2 in
                 password1 == password2 && password1.count >= 8
             }
+        
+        Observable
+            .combineLatest(isValidEmail, isValidPassword)
+            .map { email, password in
+                email == true && password == true
+            }
             .subscribe( onNext: { [weak self] in
-                self.registerButton.isEnabled = $0
-            } )
-            .disposed(by: disoseBag)
+                self?.registerButton.isEnabled = $0
+            })
+            .disposed(by: disposeBag)
     }
-    
     
 }
 
